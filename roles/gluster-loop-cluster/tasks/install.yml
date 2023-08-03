@@ -1,45 +1,33 @@
----
-- name: Install GlusterFS Repo
-  package:
-    name: centos-release-gluster
-    state: present
-- name: Install Epel Release
-  package:
-    name: epel-release
-    state: present 
 - name: Install GlusterFS-Server
-  package:
+  apt:
     name: glusterfs-server
     state: present
+
+- name: Check if file exists
+  stat:
+    path: "{{disk_image_path}}"
+  register: image_exists
+
 - name: Create Empty File
   command: "fallocate -l {{disk_size}} {{disk_image_path}}" 
-- name: Detach all loop devices
-  command: losetup -D
-- name: Loop Image as device
-  shell: losetup -fP --show "{{disk_image_path}}"
-  register: losetup_output
-- set_fact: lodevice="{{losetup_output.stdout}}"
-- name: Wait for loop device
-  wait_for: timeout=3
-- name: Format loop device
-  filesystem:
-    fstype: ext4
-    dev: "{{lodevice}}"
+  when: not image_exists.stat.exists
 
 - name: Create directory for disk mount
   file:
     path: "{{disk_path}}"
     state: directory
 
-- name: Mount loop disk
-  command: "mount {{lodevice}} {{disk_path}}"
-- name: Wait for mount loop disk
-  wait_for: timeout=3
-- name: Set cron for loop device
-  cron:
-    name: "Loop image as device"
-    special_time: reboot
-    job: "/usr/sbin/losetup {{lodevice}} {{disk_image_path}} && /usr/bin/mount -t ext4 {{lodevice}} {{disk_path}} && /usr/sbin/service glusterd restart"
+- name: Format loop device
+  filesystem:
+    fstype: ext4
+    dev: "{{disk_image_path}}"
+
+- name: Mount loopdevice
+  ansible.posix.mount:
+    path: "{{disk_path}}"
+    src: "{{disk_image_path}}"
+    fstype: ext4,loop
+    state: present
 
 - name: Start glusterd service
   service:
@@ -78,7 +66,7 @@
     opts: auto
     state: present
 
-- name: Mount All
-  command: mount -a warn=no
-
-
+- name: reload systemctl
+  command: systemctl daemon-reload
+- name: update mounts
+  command: mount -a
