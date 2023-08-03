@@ -8,7 +8,7 @@ This Ansible playbook,
 - Create image files with size defined in playbook
 - Create loop devices with image files
 - Create mount directories
-- Create GlusterFW Replication
+- Create GlusterFS Replication
 - Mount 
 
 ## Requirements
@@ -37,7 +37,7 @@ ansible-playbook -i hosts uninstall.yml
 For advanced configuration, you can change the file ```roles/gluster-loop-cluster/defaults/main.yml``` for your needs.
 
 ## Changes ##
-- Mount image via /etc/fstab ( no cron needed
-- LoopDevice will not change everytime the install playbook ia running
+- Mount image via /etc/fstab ( no cron needed )
+- LoopDevice will not change everytime the install playbook is running
 - Format image file direct without loop-device
 - tested against debian 12 ( bookworm )
