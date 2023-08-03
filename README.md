@@ -35,3 +35,9 @@ ansible-playbook -i hosts uninstall.yml
 
 ## Advanced configuration
 For advanced configuration, you can change the file ```roles/gluster-loop-cluster/defaults/main.yml``` for your needs.
+
+## Changes ##
+- Mount image via /etc/fstab ( no cron needed
+- LoopDevice will not change everytime the install playbook ia running
+- Format image file direct without loop-device
+- tested against debian 12 ( bookworm )
